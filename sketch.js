@@ -29,7 +29,7 @@ function setup() {
   //trova lista di tutti i valori della colonna continent (che si ripetono)
   allContinents = data.getColumn("continent");
 
-  //trova lista dei continenti senza ripetizioni
+  //trova lista dei continenti senza ripetizioni ("set" serve per togliere doppioni)
   let uniqueContinents = new Set(allContinents);
   let uniqueContinentsArray=[...uniqueContinents].sort(); //trasformo il set in un array (con i ...) e l'ho messo in ordine alfabetico (con il sort)
   
@@ -51,7 +51,7 @@ function setup() {
   
 
   createCanvas(windowWidth, totalHeight); //lunghezza più ampia per fare scroll verticale
-  // background(240, 240, 240);
+  background("white");
   //CONTINENTI
   // creo ciclo for per disegnare cerchio con nome continente
   for (let i = 0; i < uniqueContinentsArray.length; i++) {
@@ -59,10 +59,10 @@ function setup() {
     let yCentro = (padding + circleSize) * (i + 1) - circleSize / 2;
     noStroke();
     drawContinent(xCentro, yCentro, circleSize, uniqueContinentsArray[i]);
-    // Aggiungi la legenda dopo il primo cerchio (o dove vuoi che appaia)
-    if (i === 0) {  // Per esempio, la metto solo per il primo continente
+    // aggiungi la legenda dopo il primo cerchio (o dove vuoi che appaia)
+    if (i === 0) {  // la metto solo per il primo continente
       drawLegend(xCentro, yCentro, minTemp, maxTemp);
-      // Aggiungi la legenda per lo spessore (area)
+      // legenda per lo spessore (area)
       drawAreaLegend(xCentro, yCentro, minArea, maxArea);
     }
     drawRivers(xCentro, yCentro, uniqueContinentsArray[i], data, maxLength, minLength, maxArea, minArea, maxTemp, minTemp);
@@ -90,11 +90,12 @@ function drawContinent(xCentro, yCentro, diametro, continentName) {
 //lo spessore del tratto rappresenta l'area del fiume
 
 function drawRivers(xCentro, yCentro, continentName, rowData, maxLength, minLength, maxArea, minArea, maxTemp, minTemp) {
-  // Trovo tutte le righe relative ai fiumi del continente specificato
+  // trovo tutte le righe relative ai fiumi del continente specificato
   let rivers = rowData.findRows(continentName, "continent"); 
-  // Calcolo l'angolo tra un fiume e il successivo (per distribuirli uniformemente)
+  // calcolo l'angolo tra un fiume e il successivo (per distribuirli bene)
   let sliceAngle = TWO_PI / rivers.length; 
-  // Definisco i colori per le temperature (Blu per freddo, Rosso per caldo)
+
+  // colori per le temperature (blu per freddo, rosso per caldo)
   let colorCold = color(77, 136, 255);
   let colorHot = color(255, 94, 77);
 
@@ -108,11 +109,11 @@ function drawRivers(xCentro, yCentro, continentName, rowData, maxLength, minLeng
   //             |---------------| nuovo range più piccolo e meglio rappresentabile 
   // per rimappare fa le proporzioni
   for (let r = 0; r < rivers.length; r++) {
-    // Rimappo la lunghezza del fiume nel range desiderato
+    // rimappo la lunghezza del fiume nel range desiderato
     let length = map(rivers[r].getNum("length"), minLength, maxLength, startLength, stopLength);
-    // Rimappo l'area del fiume per definire lo spessore della linea
+    // rimappo l'area del fiume per definire lo spessore
     let area = map(rivers[r].getNum("area"), minArea, maxArea, startArea, stopArea);
-    // Rimappo la temperatura media del fiume per definire il colore
+    // rimappo la temperatura media del fiume per definire il colore
     let avgTemp = map(rivers[r].getNum("avg_temp"), minTemp, maxTemp, startTemp, stopTemp);
 
     // Calcolo l'angolo per la direzione del fiume rispetto al centro
@@ -124,17 +125,17 @@ function drawRivers(xCentro, yCentro, continentName, rowData, maxLength, minLeng
     strokeWeight(area); 
     noFill();
 
-    // Punto iniziale del fiume (sempre al centro del cerchio)
+    // punto iniziale del fiume (sempre lo stesso)
     let xStart = xCentro; 
     let yStart = yCentro; 
-    // Punto finale del fiume (lunghezza determinata e direzione data dall'angolo)
+    // punto finale del fiume (lunghezza determinata e direzione data dall'angolo)
     let xEnd = xCentro + cos(angle) * length; 
     let yEnd = yCentro + sin(angle) * length;
 
-    // Imposto i parametri per creare la sinuosità della linea
-    let amplitude = random(10, 20); // Ampiezza delle onde (valore casuale)
-    let wavelength = random(100, 150); // Lunghezza d'onda delle onde (valore casuale)
-    let numPoints = 100; // Numero di punti per costruire la curva (più punti = curva più fluida)
+    // per creare la linea ondulata
+    let amplitude = random(10, 20); // ampiezza delle onde (valore a caso)
+    let wavelength = random(100, 150); // lunghezza d'onda delle onde (valore casuale)
+    let numPoints = 100; // numero di punti per costruire la curva (più punti = curva più fluida)
 
     beginShape();
     // Itero sui punti tra l'inizio e la fine del fiume per creare la sinuosità
@@ -164,17 +165,17 @@ function drawRivers(xCentro, yCentro, continentName, rowData, maxLength, minLeng
 }
 
 function drawLegend(xCentro, yCentro, minTemp, maxTemp) {
-  // Distanza tra il cerchio e la legenda
+  // distanza tra il cerchio e la legenda
   let legendWidth = 20; // Larghezza del rettangolo
   let legendHeight = 200; // Altezza del rettangolo
   let legendX = xCentro + circleSize / 2 + 100; // Posizione orizzontale a destra del cerchio
   let legendY = yCentro - legendHeight / 2; // Posizione verticale centrata rispetto al cerchio
 
-  // Disegno il gradiente tra i colori freddi e caldi
+  // disegno il gradiente tra i colori freddi e caldi
   let colorCold = color(77, 136, 255);  // Blu (freddo)
   let colorHot = color(255, 94, 77);   // Rosso (caldo)
   
-  // Disegno il rettangolo con gradiente
+  // disegno il rettangolo con gradiente
   for (let i = 0; i < legendHeight; i++) {
     let lerpColorValue = map(i, 0, legendHeight, 0, 1); // Mappa l'altezza per ottenere una transizione
     let col = lerpColor(colorHot, colorCold, lerpColorValue); // Interpolazione del colore
@@ -182,7 +183,7 @@ function drawLegend(xCentro, yCentro, minTemp, maxTemp) {
     line(legendX, legendY + i, legendX + legendWidth, legendY + i); // Disegna una linea per ogni pixel della sfumatura
   }
 
-  // Testo per le temperature minima e massima
+  // testo per le temperature minima e massima
   noStroke();
   fill(0);
   textSize(16);
@@ -192,31 +193,31 @@ function drawLegend(xCentro, yCentro, minTemp, maxTemp) {
 }
 
 function drawAreaLegend(xCentro, yCentro, minArea, maxArea) {
-  // Posizione della legenda a sinistra del primo cerchio
+  // posizione della legenda a sinistra del primo cerchio
   let legendWidth = 100;
   let legendHeight = 200;
   let legendX = xCentro - circleSize / 2 - legendWidth - 100; // Posizione orizzontale a sinistra del cerchio
   let legendY = yCentro - legendHeight/4; // Posizione verticale centrata rispetto al cerchio
 
-  // Definisco i cinque spessori
+  // cinque spessori
   let thicknessMin = 1;  // Spessore minimo
   let thicknessMax = 20; // Spessore massimo
   let numLines = 5;      // Numero di tratti
 
-  // Disegno i tratti orizzontali con spessori diversi
+  // tratti orizzontali con spessori diversi
   for (let i = 0; i < numLines; i++) {
     let x1 = legendX;
     let x2 = legendX + legendWidth;
     let y = legendY + i * 20 + 10; // Distanza verticale tra i tratti
 
-    // Calcolo lo spessore del tratto in base alla posizione
+    // calcolo lo spessore del tratto in base alla posizione
     let thickness = map(i, 0, numLines - 1, thicknessMin, thicknessMax);
     stroke(0); 
     strokeWeight(thickness);
     line(x1, y, x2, y);
   }
 
-  // Testo per le aree minime e massime
+  // testo per le aree minime e massime
   fill(0);
   strokeWeight(0);
   textSize(16);
